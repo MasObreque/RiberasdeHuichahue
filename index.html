@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riberas de Huichahue - Gestión de Condominio</title>
+    <!-- Carga de Tailwind CSS desde CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuración global de fuente */
+        :root {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilos base para el cuerpo */
+        body {
+            margin: 0;
+            background-color: #f5f5f4; /* bg-stone-100 */
+        }
+        /* Para asegurar que el SVG del mapa se comporte correctamente */
+        #mapa-container svg {
+            display: block;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Georgia', 'serif'],
+                    },
+                    colors: {
+                        'stone': {
+                            50: '#fafaf9', 100: '#f5f5f4', 300: '#d6d3d1', 500: '#78716c',
+                            600: '#57534e', 700: '#44403c', 800: '#292524', 900: '#0c0a09'
+                        },
+                        'green': {
+                            50: '#f7fee7', 100: '#dcfce7', 600: '#059669', 700: '#047857',
+                            800: '#065f46'
+                        },
+                        'amber': {
+                            50: '#fffbeb', 100: '#fef3c7', 300: '#fcd34d', 500: '#f59e0b',
+                            600: '#d97706', 700: '#b45309', 800: '#92400e'
+                        },
+                        'blue': {
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-stone-100 font-sans text-stone-800">
+    <div id="app-root">
+        <!-- El contenido de la aplicación será renderizado aquí por JavaScript -->
+    </div>
+
+    <script>
+        // --- 1. Definición de Datos Estáticos (Simulación de .json) ---
+
+        const initialParcelsData = [
+            { "id": 1, "nro_parcela": "P-101", "loteo": "A", "nombre_propietario": "Ana Torres", "telefono_contacto": "56987654321", "email": "ana.torres@mail.cl", "estado_pago": "Al Día" },
+            { "id": 2, "nro_parcela": "P-102", "loteo": "A", "nombre_propietario": "Benjamín Flores", "telefono_contacto": "56912345678", "email": "benja.f@mail.cl", "estado_pago": "Con Deuda" },
+            { "id": 3, "nro_parcela": "P-103", "loteo": "A", "nombre_propietario": "Carla Soto", "telefono_contacto": "56923456789", "email": "carla.s@mail.cl", "estado_pago": "Al Día" },
+            { "id": 4, "nro_parcela": "P-201", "loteo": "B", "nombre_propietario": "Daniel Pérez", "telefono_contacto": "56934567890", "email": "daniel.p@mail.cl", "estado_pago": "Con Deuda" },
+            { "id": 5, "nro_parcela": "P-202", "loteo": "B", "nombre_propietario": "Elena Gutiérrez", "telefono_contacto": "56945678901", "email": "elena.g@mail.cl", "estado_pago": "Al Día" },
+            { "id": 6, "nro_parcela": "P-301", "loteo": "C", "nombre_propietario": "Felipe Herrera", "telefono_contacto": "56956789012", "email": "felipe.h@mail.cl", "estado_pago": "Con Deuda" },
+            { "id": 7, "nro_parcela": "P-302", "loteo": "C", "nombre_propietario": "Gabriela Izquierdo", "telefono_contacto": "56967890123", "email": "gabriela.i@mail.cl", "estado_pago": "Al Día" },
+            { "id": 8, "nro_parcela": "P-401", "loteo": "D", "nombre_propietario": "Héctor Jiménez", "telefono_contacto": "56978901234", "email": "hector.j@mail.cl", "estado_pago": "Con Deuda" }
+        ];
+
+        const roadAgreementsData = [
+            { "nombre_propietario": "Patricio Jocelyn", "nro_parcela": "SA-31" },
+            { "nombre_propietario": "Ricardo", "nro_parcela": "R-08" },
+            { "nombre_propietario": "Macarena", "nro_parcela": "SA-18" },
+            { "nombre_propietario": "Guacolda Alonso", "nro_parcela": "R-XX" },
+            { "nombre_propietario": "Gabriela Delgado", "nro_parcela": "V-08" },
+            { "nombre_propietario": "Luis Terán", "nro_parcela": "SA-21" },
+            { "nombre_propietario": "Alexis Cortes", "nro_parcela": "SA-20" },
+            { "nombre_propietario": "Javier Pradenas", "nro_parcela": "SA-16" },
+            { "nombre_propietario": "Patricio Osses", "nro_parcela": "SA-24" },
+            { "nombre_propietario": "Camilo Cuevas", "nro_parcela": "SA-27" },
+            { "nombre_propietario": "Fernando Seguel", "nro_parcela": "SA-25" },
+            { "nombre_propietario": "Cristofer Zarate", "nro_parcela": "SM-09" },
+            { "nombre_propietario": "Miguel Castro", "nro_parcela": "R-07" },
+            { "nombre_propietario": "Felipe Bruggink", "nro_parcela": "V-11" },
+            { "nombre_propietario": "Felipe Bruggink", "nro_parcela": "V-12" },
+            { "nombre_propietario": "Fabián Esparza Oyarzún", "nro_parcela": "XX-XX" },
+            { "nombre_propietario": "Ruben Henriquez", "nro_parcela": "R-06" },
+            { "nombre_propietario": "René Contreras", "nro_parcela": "SA-19" },
+            { "nombre_propietario": "Marcela Bravo", "nro_parcela": "V-18" },
+            { "nombre_propietario": "Jaime", "nro_parcela": "R-12" },
+            { "nombre_propietario": "Hector Trecaman", "nro_parcela": "XX-XX" },
+            { "nombre_propietario": "Maria Dolores", "nro_parcela": "R-15" },
+            { "nombre_propietario": "Alberto Aravena", "nro_parcela": "R-19" },
+            {"nombre_propietario": "Alberto Aravena","nro_parcela": "R-19"},
+            {"nombre_propietario": "Viviana Solís","nro_parcela": "B-3"},
+            {"nombre_propietario": "Carlos Heide","nro_parcela": "XX-32"},
+            {"nombre_propietario": "Myriam","nro_parcela": "SA-11"}
+        ];
+
+        // --- 2. Variables de Estado Globales ---
+
+        let parcels = [];
+        let currentView = 'home';
+        const LOCAL_STORAGE_KEY = 'parcelaPaymentOverrides';
+        const ROAD_AGREEMENT_BUDGET_KEY = 'roadAgreementBudget';
+        let roadAgreementBudget = 0;
+        let searchTerm = '';
+        let filterStatus = 'Todos';
+        let hoveredParcela = null;
+
+        // --- 3. Funciones de Utilidad y Persistencia ---
+
+        /**
+         * Persiste el estado actual de las parcelas con los overrides de pago
+         */
+        const saveParcelsState = (newParcels) => {
+            parcels = newParcels;
+            try {
+                const overrides = parcels.reduce((acc, p) => {
+                    // Solo guardamos el estado si es diferente del estado inicial (simulado)
+                    const initial = initialParcelsData.find(ip => ip.id === p.id);
+                    if (initial && initial.estado_pago !== p.estado_pago) {
+                        acc[p.id] = p.estado_pago;
+                    }
+                    return acc;
+                }, {});
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(overrides));
+            } catch (error) {
+                console.error("Error al guardar estado de parcelas en localStorage:", error);
+            }
+            renderApp(); // Volver a renderizar la aplicación para reflejar el cambio
+        };
+
+        /**
+         * Carga los datos de las parcelas, aplicando los overrides de localStorage.
+         */
+        const loadParcelsData = () => {
+            try {
+                const overrides = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
+                const updatedParcels = initialParcelsData.map(parcel => {
+                    if (overrides[parcel.id]) {
+                        return { ...parcel, estado_pago: overrides[parcel.id] };
+                    }
+                    return { ...parcel };
+                });
+                parcels = updatedParcels;
+            } catch (error) {
+                console.error("Error al cargar datos de parcelas de localStorage:", error);
+                parcels = initialParcelsData; // Fallback
+            }
+        };
+        
+        /**
+         * Carga el presupuesto para el acuerdo de camino desde localStorage.
+         * ESTA FUNCIÓN GARANTIZA LA PERSISTENCIA DEL PRESUPUESTO.
+         */
+        const loadRoadAgreementBudget = () => {
+             try {
+                const storedBudget = localStorage.getItem(ROAD_AGREEMENT_BUDGET_KEY);
+                roadAgreementBudget = storedBudget ? parseFloat(storedBudget) : 0;
+            } catch (e) {
+                console.error("Error al cargar presupuesto de almacenamiento local:", e);
+                roadAgreementBudget = 0;
+            }
+        }
+
+        /**
+         * Actualiza el estado de pago de una parcela.
+         */
+        const updatePaymentStatus = (parcelId, newStatus) => {
+            const newParcels = parcels.map(p =>
+                p.id === parcelId ? { ...p, estado_pago: newStatus } : p
+            );
+            saveParcelsState(newParcels);
+        };
+
+        /**
+         * Función para formatear a moneda chilena (CLP).
+         */
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(amount);
+        };
+
+        /**
+         * Función para crear el link de WhatsApp.
+         */
+        const createWhatsAppLink = (phone, name, parcela) => {
+            const cleanPhone = phone.replace(/[^\d+]/g, '');
+            let formattedPhone = cleanPhone;
+
+            if (!cleanPhone.startsWith('+')) {
+                // Asumiendo que si es un número chileno sin +, se le agrega +56.
+                formattedPhone = cleanPhone.length === 9 ? `+569${cleanPhone.substring(1)}` : `+${cleanPhone}`;
+            }
+            
+            const message = encodeURIComponent(
+                `Estimado(a) ${name}, le recordamos amablemente que la Parcela ${parcela} registra un saldo pendiente de pago. Por favor, regularizar a la brevedad. Gracias. (Condominio Riberas de Huichahue)`
+            );
+            return `https://wa.me/${formattedPhone}?text=${message}`;
+        };
+
+        /**
+         * Maneja el cambio en el input de presupuesto (RoadAgreementsPanel).
+         * GUARDA EL VALOR EN LOCALSTORAGE.
+         */
+        const handleBudgetChange = (value) => {
+            // Limpiar el valor de puntos (miles) para obtener el número puro.
+            const numericValue = value === '' ? 0 : parseFloat(value.replace(/\./g, '').replace(',', ''));
+            roadAgreementBudget = numericValue;
+            
+            // Persistir presupuesto a localStorage
+            try {
+                localStorage.setItem(ROAD_AGREEMENT_BUDGET_KEY, numericValue.toString());
+            } catch (e) {
+                console.error("Error al guardar presupuesto en almacenamiento local:", e);
+            }
+            renderApp(); // Rerenderiza para actualizar el cálculo de la cuota
+        };
+
+        // --- 4. Renderización de Componentes (HTML Strings) ---
+
+        /**
+         * Genera el HTML para el panel de acuerdos de camino.
+         */
+        const renderRoadAgreementsPanel = () => {
+            const totalParticipants = roadAgreementsData.length;
+            const calculatedFee = totalParticipants > 0 && roadAgreementBudget > 0 
+                ? Math.ceil(roadAgreementBudget / totalParticipants) 
+                : 0;
+
+            const formattedBudget = formatCurrency(roadAgreementBudget);
+            const formattedFee = formatCurrency(calculatedFee);
+            
+            // Formatear el valor del presupuesto para que se muestre en el input
+            const formattedBudgetInput = roadAgreementBudget > 0 
+                ? new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0 }).format(roadAgreementBudget) 
+                : '';
+
+            return `
+                <div class="lg:w-1/3 bg-white shadow-xl rounded-xl p-6 border-l-4 border-amber-500 h-fit">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-stone-100">
+                        <h3 class="text-lg font-bold text-stone-800 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-amber-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            Acuerdos Camino Confirmados
+                        </h3>
+                    </div>
+                    <p class="text-sm text-stone-600 mb-4">
+                        Gestión y cálculo de la cuota para los propietarios comprometidos con el arreglo vial.
+                    </p>
+                    
+                    <div class="bg-amber-50 p-4 rounded-lg mb-4 border border-amber-200">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-sm font-medium text-stone-700">Total Propietarios Comprometidos:</span>
+                            <span class="px-3 py-1 text-base font-bold rounded-full bg-amber-200 text-amber-800">
+                                ${totalParticipants}
+                            </span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="budget-input" class="block text-sm font-medium text-stone-700 mb-1">
+                                Presupuesto Total del Arreglo (CLP):
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-lg font-semibold text-stone-500">$</span>
+                                <input
+                                    id="budget-input"
+                                    type="text"
+                                    value="${formattedBudgetInput}"
+                                    placeholder="5.000.000"
+                                    onchange="handleBudgetChange(this.value)"
+                                    class="w-full p-2 pl-8 border border-amber-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 text-lg text-right"
+                                />
+                            </div>
+                            <p class="text-xs text-stone-500 mt-1">Presupuesto actual guardado: <span class="font-semibold">${formattedBudget}</span></p>
+                        </div>
+
+                        <div class="pt-3 border-t border-amber-300">
+                            <span class="text-sm font-medium text-stone-700 block mb-1">Cuota por Propietario:</span>
+                            <span class="text-3xl font-extrabold text-green-700">
+                                ${formattedFee}
+                            </span>
+                            <p class="text-xs text-stone-500 mt-1">
+                                *Cálculo: Presupuesto (${formattedBudget}) / ${totalParticipants} propietarios
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <h4 class="text-md font-semibold text-stone-700 mb-3">Participantes en el Acuerdo (${totalParticipants})</h4>
+                    <ul class="divide-y divide-stone-100 max-h-52 overflow-y-auto pr-2">
+                        ${roadAgreementsData.map((agreement, index) => `
+                            <li key="${index}" class="flex justify-between items-center text-sm text-stone-800 hover:bg-stone-50 rounded-md px-2 py-1 transition duration-150 ease-in-out">
+                                <span class="font-medium truncate">${agreement.nombre_propietario}</span>
+                                <span class="font-mono text-xs px-2 py-0.5 bg-green-50 text-green-700 rounded-full ml-2 flex-shrink-0">
+                                    ${agreement.nro_parcela}
+                                </span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    ${roadAgreementsData.length === 0 ? `
+                        <p class="text-center text-stone-500 mt-4 text-sm">Aún no hay acuerdos de pago registrados.</p>
+                    ` : ''}
+                </div>
+            `;
+        };
+        
+        /**
+         * Genera el HTML para la vista inicial (Home).
+         */
+        const renderHome = () => {
+            return `
+                <div class="p-6">
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        
+                        <div class="lg:w-2/3 p-6 bg-white rounded-xl shadow-lg border border-stone-200">
+                            <h2 class="text-3xl font-serif text-stone-800 mb-4">
+                                Bienvenido al Portal de Gestión
+                            </h2>
+                            <p class="text-stone-600 mb-6 max-w-xl">
+                                Riberas de Huichahue, un proyecto diseñado para el descanso y la conexión con la naturaleza del sur de Chile.
+                                Utilice el menú superior para acceder al plano interactivo, la gestión de pagos y la lista de deudores.
+                            </p>
+                            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                                <button onclick="setCurrentView('mapa')" class="px-6 py-3 bg-green-700 text-white rounded-xl shadow-lg hover:bg-green-800 transition-colors text-center font-semibold">
+                                    Ver Plano de Loteo
+                                </button>
+                                <button onclick="setCurrentView('gestion')" class="px-6 py-3 bg-amber-600 text-white rounded-xl shadow-lg hover:bg-amber-700 transition-colors text-center font-semibold">
+                                    Ir a Gestión de Pagos
+                                </button>
+                            </div>
+                        </div>
+
+                        ${renderRoadAgreementsPanel()}
+                    </div>
+                </div>
+            `;
+        };
+
+        /**
+         * Genera el HTML para la vista de gestión.
+         */
+        const renderGestion = () => {
+            const filteredParcels = parcels.filter(parcel => {
+                const matchesSearch = parcel.nro_parcela.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                      parcel.nombre_propietario.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesStatus = filterStatus === 'Todos' || parcel.estado_pago === filterStatus;
+                return matchesSearch && matchesStatus;
+            });
+
+            return `
+                <div class="p-4 md:p-8">
+                    <h2 class="text-3xl font-serif text-stone-800 mb-6 border-b pb-2">Gestión de Cobranzas</h2>
+                    
+                    <!-- Controles de Filtro y Búsqueda -->
+                    <div class="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-stone-100 rounded-lg shadow-inner border border-stone-300">
+                        <input
+                            type="text"
+                            id="search-input"
+                            placeholder="Buscar por N° Parcela o Propietario..."
+                            value="${searchTerm}"
+                            oninput="setSearchTerm(this.value)"
+                            class="p-3 border border-stone-300 rounded-lg focus:ring-green-500 focus:border-green-500 flex-grow"
+                        />
+                        <select
+                            id="filter-status-select"
+                            onchange="setFilterStatus(this.value)"
+                            class="p-3 border border-stone-300 rounded-lg bg-white"
+                        >
+                            <option value="Todos" ${filterStatus === 'Todos' ? 'selected' : ''}>Todos los Estados</option>
+                            <option value="Al Día" ${filterStatus === 'Al Día' ? 'selected' : ''}>Al Día</option>
+                            <option value="Con Deuda" ${filterStatus === 'Con Deuda' ? 'selected' : ''}>Con Deuda</option>
+                        </select>
+                    </div>
+
+                    <!-- Tabla de Resultados -->
+                    <div class="overflow-x-auto bg-white rounded-xl shadow-lg">
+                        <table class="min-w-full divide-y divide-stone-200">
+                            <thead class="bg-stone-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Parcela</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Propietario</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Loteo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Estado de Pago</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-200">
+                                ${filteredParcels.length > 0 ? (
+                                    filteredParcels.map(parcel => {
+                                        const isDebt = parcel.estado_pago === 'Con Deuda';
+                                        return `
+                                            <tr key="${parcel.id}" class="hover:bg-stone-50 transition-colors">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">${parcel.nro_parcela}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-700">${parcel.nombre_propietario}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-700">${parcel.loteo}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-3 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                        ${isDebt ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-green-100 text-green-800 border border-green-300'}
+                                                    ">
+                                                        ${parcel.estado_pago}
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button
+                                                        onclick="handlePaymentChange(${parcel.id}, '${parcel.estado_pago}')"
+                                                        class="
+                                                            px-3 py-1 text-white text-xs font-semibold rounded-lg shadow-md transition-all duration-150
+                                                            ${isDebt ? 'bg-green-600 hover:bg-green-700' : 'bg-stone-500 hover:bg-stone-600'}
+                                                        "
+                                                        title="${isDebt ? 'Marcar como Pagado' : 'Revertir a Deuda'}"
+                                                    >
+                                                        ${isDebt ? 'Marcar Pago' : 'Revertir a Deuda'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')
+                                ) : (
+                                    `<tr>
+                                        <td colSpan="5" class="px-6 py-4 text-center text-stone-500">No se encontraron parcelas.</td>
+                                    </tr>`
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        };
+
+        /**
+         * Maneja el cambio de estado de pago desde la vista de gestión.
+         */
+        const handlePaymentChange = (parcelId, currentStatus) => {
+            const newStatus = currentStatus === 'Con Deuda' ? 'Al Día' : 'Con Deuda';
+            updatePaymentStatus(parcelId, newStatus);
+        };
+
+        /**
+         * Establece el término de búsqueda y fuerza la renderización.
+         */
+        const setSearchTerm = (value) => {
+            searchTerm = value;
+            renderApp();
+        };
+
+        /**
+         * Establece el filtro de estado y fuerza la renderización.
+         */
+        const setFilterStatus = (value) => {
+            filterStatus = value;
+            renderApp();
+        };
+
+        /**
+         * Genera el HTML para la vista de deudores.
+         */
+        const renderDeudores = () => {
+            const debtors = parcels.filter(p => p.estado_pago === 'Con Deuda');
+
+            return `
+                <div class="p-4 md:p-8">
+                    <h2 class="text-3xl font-serif text-amber-800 mb-6 border-b pb-2">Lista de Deudores Activos</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${debtors.length > 0 ? (
+                            debtors.map(parcel => {
+                                const whatsappLink = createWhatsAppLink(parcel.telefono_contacto, parcel.nombre_propietario, parcel.nro_parcela);
+                                return `
+                                    <div key="${parcel.id}" class="bg-amber-50 border-2 border-amber-300 rounded-xl p-5 shadow-lg">
+                                        <p class="text-sm font-light text-stone-500">Parcela</p>
+                                        <h3 class="text-2xl font-bold text-amber-800 mb-3">${parcel.nro_parcela}</h3>
+                                        
+                                        <p class="text-stone-700 mb-1">
+                                            <span class="font-semibold">Propietario:</span> ${parcel.nombre_propietario}
+                                        </p>
+                                        <p class="text-stone-700 mb-3">
+                                            <span class="font-semibold">Loteo:</span> ${parcel.loteo}
+                                        </p>
+
+                                        <a
+                                            href="${whatsappLink}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="w-full inline-flex items-center justify-center px-4 py-2 mt-3 text-sm font-semibold rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors shadow-md"
+                                        >
+                                            <!-- Ícono de WhatsApp (SVG simple) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-4 h-4 mr-2 fill-current">
+                                                <path d="M380.9 97.1C339.4 55.4 283.4 32 225.6 32c-121.2 0-219 97.9-219 218.6 0 38.3 10.3 75.3 29.8 108.6l-31.3 114.7 117.2-30.6c31.7 16.5 67.2 25.1 103.3 25.1h.1c121.1 0 219.1-97.9 219.1-218.6 0-57.7-22.3-113.8-64-155.5zm-51.5 159.9c0 51.5-41.9 93.4-93.4 93.4-18.1 0-35.3-5.2-49.8-14.7l-3.3-2.3-34.9 9.1 9.3-34.1-2.4-3.4c-9.5-14.5-14.7-31.7-14.7-49.8 0-51.5 41.9-93.4 93.4-93.4s93.4 41.9 93.4 93.4zm0-93.4c0-51.5-41.9-93.4-93.4-93.4s-93.4 41.9-93.4 93.4c0 17.9 4.9 34.7 13.9 49.3l-20.9 76.5 78.4-20.5c14.6 9.1 31.4 13.9 49.3 13.9 51.5 0 93.4-41.9 93.4-93.4z"/>
+                                            </svg>
+                                            Notificar por WhatsApp
+                                        </a>
+                                    </div>
+                                `;
+                            }).join('')
+                        ) : (
+                            `<div class="col-span-full bg-green-100 border border-green-300 text-green-800 p-4 rounded-lg">
+                                ¡Felicitaciones! No hay deudores registrados. El condominio está al día.
+                            </div>`
+                        )}
+                    </div>
+                </div>
+            `;
+        };
+
+        /**
+         * Genera el HTML para la vista del mapa.
+         */
+        const renderMapa = () => {
+            const svgMapData = [
+                { nro: 'P-101', x: 10, y: 10, w: 40, h: 20 },
+                { nro: 'P-102', x: 50, y: 10, w: 40, h: 20 },
+                { nro: 'P-103', x: 90, y: 10, w: 40, h: 20 },
+                { nro: 'P-201', x: 10, y: 30, w: 60, h: 20 },
+                { nro: 'P-202', x: 70, y: 30, w: 60, h: 20 },
+                { nro: 'P-301', x: 10, y: 50, w: 20, h: 30 },
+                { nro: 'P-302', x: 30, y: 50, w: 20, h: 30 },
+                { nro: 'P-401', x: 50, y: 50, w: 80, h: 30 },
+            ];
+
+            const getParcelStyle = (nro_parcela) => {
+                const parcel = parcels.find(p => p.nro_parcela === nro_parcela);
+                if (!parcel) return 'fill-stone-300';
+                const baseClass = 'stroke-stone-900 stroke-[0.5] opacity-90 transition-colors duration-200 cursor-pointer';
+
+                if (parcel.estado_pago === 'Al Día') {
+                    return `fill-green-600 hover:fill-green-400 ${baseClass}`;
+                }
+                return `fill-amber-600 hover:fill-amber-400 ${baseClass}`;
+            };
+            
+            const getParcelColor = (nro_parcela) => {
+                const parcel = parcels.find(p => p.nro_parcela === nro_parcela);
+                if (!parcel) return 'Sin Datos'; 
+                return parcel.estado_pago;
+            };
+
+            const getHoveredParcelaContent = () => {
+                if (!hoveredParcela) return '';
+                const estado = getParcelColor(hoveredParcela);
+                const colorClass = estado === 'Al Día' ? 'text-green-700' : 'text-amber-700';
+
+                return `
+                    <div class="mt-4 p-3 bg-stone-100 rounded-lg border border-stone-300">
+                        <p class="font-bold text-lg text-stone-800">Parcela: ${hoveredParcela}</p>
+                        <p class="text-sm font-semibold ${colorClass}">
+                            Estado: ${estado}
+                        </p>
+                    </div>
+                `;
+            };
+
+            return `
+                <div class="p-4 md:p-8">
+                    <h2 class="text-3xl font-serif text-stone-800 mb-6 border-b pb-2">Plano Interactivo de Loteo</h2>
+                    
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <!-- Leyenda y Tooltip -->
+                        <div class="lg:w-1/4 p-4 bg-white rounded-xl shadow-lg border border-stone-200 h-fit">
+                            <h3 class="text-xl font-semibold mb-3 text-stone-700">Leyenda de Pagos</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 rounded-sm bg-green-600 mr-3"></div>
+                                    <span>Al Día</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 rounded-sm bg-amber-600 mr-3"></div>
+                                    <span>Con Deuda</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 rounded-sm bg-stone-300 mr-3"></div>
+                                    <span>Sin Asignar / Calles</span>
+                                </div>
+                            </div>
+                            
+                            <div id="hovered-parcela-info">
+                                ${getHoveredParcelaContent()}
+                            </div>
+                        </div>
+
+                        <!-- Mapa SVG Dinámico -->
+                        <div id="mapa-container" class="lg:w-3/4 bg-stone-50 p-4 rounded-xl shadow-inner border border-stone-300">
+                            <svg viewBox="0 0 140 100" class="w-full h-auto max-h-[70vh]">
+                                <!-- Fondo simulando el camino principal / áreas comunes -->
+                                <rect x="0" y="0" width="140" height="100" class="fill-stone-200" />
+                                
+                                <!-- Dibujar parcelas -->
+                                ${svgMapData.map((data, index) => `
+                                    <rect 
+                                        data-nro="${data.nro}"
+                                        x="${data.x}" 
+                                        y="${data.y}" 
+                                        width="${data.w}" 
+                                        height="${data.h}" 
+                                        rx="1" 
+                                        class="${getParcelStyle(data.nro)}"
+                                        onmouseenter="setHoveredParcela('${data.nro}')"
+                                        onmouseleave="setHoveredParcela(null)"
+                                    />
+                                    <text 
+                                        x="${data.x + data.w / 2}" 
+                                        y="${data.y + data.h / 2 + 1}" 
+                                        text-anchor="middle" 
+                                        font-size="4" 
+                                        class="pointer-events-none font-bold text-stone-900"
+                                    >
+                                        ${data.nro}
+                                    </text>
+                                `).join('')}
+                                
+                                <!-- Simulación de Río/Borde (Estilo Sur) -->
+                                <path 
+                                    d="M0 90 Q 70 95, 140 90 L 140 100 L 0 100 Z" 
+                                    class="fill-blue-700 opacity-70" 
+                                    title="Río/Borde del Terreno"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        /**
+         * Establece la parcela sobre la que se hace hover y fuerza la re-renderización del tooltip.
+         */
+        const setHoveredParcela = (nro) => {
+            hoveredParcela = nro;
+            // Solo actualizamos el pequeño panel de información del mapa para evitar re-renderizar todo
+            const infoPanel = document.getElementById('hovered-parcela-info');
+            if (infoPanel) {
+                // Pequeño hack: re-renderizar solo el contenido del panel de info
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = renderMapa();
+                const newInfoContent = tempDiv.querySelector('#hovered-parcela-info').innerHTML;
+                infoPanel.innerHTML = newInfoContent;
+            } else {
+                renderApp(); // Fallback si el panel no existe (ej: primera carga)
+            }
+        };
+
+        // --- 5. Lógica de Navegación y Renderización Principal ---
+
+        /**
+         * Cambia la vista de la aplicación y fuerza el re-renderizado.
+         */
+        const setCurrentView = (viewName) => {
+            currentView = viewName;
+            renderApp();
+        };
+
+        /**
+         * Genera el HTML para el NavItem.
+         */
+        const renderNavItem = (viewName, label) => {
+            const isActive = currentView === viewName;
+            return `
+                <button
+                    onclick="setCurrentView('${viewName}')"
+                    class="
+                        px-4 py-2 rounded-lg transition-all duration-200 text-sm md:text-base font-semibold
+                        ${isActive
+                            ? 'bg-green-700 text-white shadow-lg shadow-green-900/50'
+                            : 'text-stone-700 hover:bg-stone-200 hover:text-stone-900'
+                        }
+                    "
+                >
+                    ${label}
+                </button>
+            `;
+        };
+
+        /**
+         * Renderiza el contenido principal de la aplicación basado en la vista actual.
+         */
+        const renderMainContent = () => {
+            switch (currentView) {
+                case 'mapa':
+                    return renderMapa();
+                case 'gestion':
+                    return renderGestion();
+                case 'deudores':
+                    return renderDeudores();
+                case 'home':
+                default:
+                    return renderHome();
+            }
+        };
+
+        /**
+         * Renderiza toda la aplicación (Encabezado + Contenido) en el DOM.
+         */
+        const renderApp = () => {
+            const appRoot = document.getElementById('app-root');
+            
+            // 1. Generar HTML del Encabezado
+            const headerHTML = `
+                <header class="bg-white shadow-lg sticky top-0 z-10">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row justify-between items-center">
+                        <h1 class="text-xl md:text-2xl font-serif font-bold text-stone-900">
+                            Riberas de Huichahue
+                        </h1>
+                        <nav class="flex space-x-2 md:space-x-4 mt-3 md:mt-0 p-1 bg-stone-50 rounded-xl">
+                            ${renderNavItem('home', 'Inicio')}
+                            ${renderNavItem('mapa', 'Plano de Loteo')}
+                            ${renderNavItem('gestion', 'Gestión de Pagos')}
+                            ${renderNavItem('deudores', 'Lista de Deudores')}
+                        </nav>
+                    </div>
+                </header>
+            `;
+
+            // 2. Generar Contenido Principal
+            const mainContentHTML = `
+                <main class="max-w-7xl mx-auto">
+                    ${renderMainContent()}
+                </main>
+            `;
+            
+            // 3. Insertar en el DOM
+            appRoot.innerHTML = headerHTML + mainContentHTML;
+        };
+
+        // --- 6. Inicialización de la Aplicación ---
+
+        window.onload = function () {
+            // Cargar datos y presupuesto iniciales (incluida la persistencia del presupuesto)
+            loadParcelsData();
+            loadRoadAgreementBudget();
+            
+            // Renderizar la aplicación por primera vez
+            renderApp();
+        };
+    </script>
+</body>
+</html>
