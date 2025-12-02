@@ -20,6 +20,45 @@
         #mapa-container svg {
             display: block;
         }
+
+        /* ========================================================== */
+        /* [INICIO] ESTILOS PARA LA NUEVA TABLA (Propietarios sin Responder) */
+        /* ========================================================== */
+        .table-unanswered {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .table-unanswered th, .table-unanswered td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #f5f5f4; /* Borde suave */
+        }
+        .table-unanswered thead th {
+            background-color: #fef3c7; /* Color amber-100 */
+            color: #78716c; /* stone-600 */
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+        .table-unanswered tbody tr:nth-child(even) {
+            background-color: #fffbeb; /* Color amber-50 */
+        }
+        .table-unanswered tbody tr:hover {
+            background-color: #fef3c7; /* Color amber-100 en hover */
+        }
+        .parcel-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 9999px; /* rounded-full */
+            background-color: #fcd34d; /* amber-300 */
+            color: #92400e; /* amber-800 */
+        }
+        /* ========================================================== */
+        /* [FIN] ESTILOS PARA LA NUEVA TABLA */
+        /* ========================================================== */
     </style>
     <script>
         tailwind.config = {
@@ -71,38 +110,100 @@
         ];
 
         const roadAgreementsData = [
-            { "nombre_propietario": "Patricio Jocelyn", "nro_parcela": "SA-31" },
-            { "nombre_propietario": "Ricardo", "nro_parcela": "R-08" },
-            { "nombre_propietario": "Macarena", "nro_parcela": "SA-18" },
-            { "nombre_propietario": "Guacolda Alonso", "nro_parcela": "R-XX" },
-            { "nombre_propietario": "Gabriela Delgado", "nro_parcela": "V-08" },
-            { "nombre_propietario": "Luis Terán", "nro_parcela": "SA-21" },
-            { "nombre_propietario": "Alexis Cortes", "nro_parcela": "SA-20" },
-            { "nombre_propietario": "Javier Pradenas", "nro_parcela": "SA-16" },
-            { "nombre_propietario": "Patricio Osses", "nro_parcela": "SA-24" },
-            { "nombre_propietario": "Camilo Cuevas", "nro_parcela": "SA-27" },
-            { "nombre_propietario": "Fernando Seguel", "nro_parcela": "SA-25" },
-            { "nombre_propietario": "Cristofer Zarate", "nro_parcela": "SM-09" },
+            { "nombre_propietario": "Hector Trecaman", "nro_parcela": "HT-01" },
+            { "nombre_propietario": "Hector Trecaman", "nro_parcela": "HT-02" },
+            { "nombre_propietario": "Ruben Henriquez", "nro_parcela": "R-06" },
             { "nombre_propietario": "Miguel Castro", "nro_parcela": "R-07" },
+            { "nombre_propietario": "Ricardo", "nro_parcela": "R-08" },
+            { "nombre_propietario": "Ricardo pavez ", "nro_parcela": "R-09" },
+            { "nombre_propietario": "Jaime", "nro_parcela": "R-12" },
+            { "nombre_propietario": "Maria Dolores", "nro_parcela": "R-15" },
+            { "nombre_propietario": "Cristian Letelier", "nro_parcela": "R-18" },
+            { "nombre_propietario": "Alberto Aravena", "nro_parcela": "R-19" },
+            { "nombre_propietario": "Alberto Aravena", "nro_parcela": "R-19" },
+            { "nombre_propietario": "Guacolda Alonso", "nro_parcela": "R-XX" },
+            { "nombre_propietario": "Myriam", "nro_parcela": "SA-11" },
+            { "nombre_propietario": "Javier Pradenas", "nro_parcela": "SA-16" },
+            { "nombre_propietario": "Macarena Obreque", "nro_parcela": "SA-18" },
+            { "nombre_propietario": "René Contreras", "nro_parcela": "SA-19" },
+            { "nombre_propietario": "Alexis Cortes", "nro_parcela": "SA-20" },
+            { "nombre_propietario": "Luis Terán", "nro_parcela": "SA-21" },
+            { "nombre_propietario": "Patricio Osses", "nro_parcela": "SA-24" },
+            { "nombre_propietario": "Fernando Seguel", "nro_parcela": "SA-25" },
+            { "nombre_propietario": "Camilo Cuevas", "nro_parcela": "SA-27" },
+            { "nombre_propietario": "Rodrigo Aguilera", "nro_parcela": "SA-29" },
+            { "nombre_propietario": "Patricio Jocelyn", "nro_parcela": "SA-31" },
+            { "nombre_propietario": "Carlos Heide", "nro_parcela": "SA-32" },
+            { "nombre_propietario": "Jaime Riquelme ", "nro_parcela": "SA-33" },
+            { "nombre_propietario": "Cristofer Zarate", "nro_parcela": "SM-09" },
+            { "nombre_propietario": "Viviana Solís", "nro_parcela": "SM-3B" },
+            { "nombre_propietario": "Kevin Martinez", "nro_parcela": "SM-XX" },
+            { "nombre_propietario": "Cecilia Silva", "nro_parcela": "SM-XX" },
+            { "nombre_propietario": "Gladys Vergara", "nro_parcela": "V-02" },
+            { "nombre_propietario": "Gabriela Delgado", "nro_parcela": "V-08" },
+            { "nombre_propietario": "Ricardo Maya", "nro_parcela": "V-10" },
             { "nombre_propietario": "Felipe Bruggink", "nro_parcela": "V-11" },
             { "nombre_propietario": "Felipe Bruggink", "nro_parcela": "V-12" },
-            { "nombre_propietario": "Fabián Esparza Oyarzún", "nro_parcela": "XX-XX" },
-            { "nombre_propietario": "Ruben Henriquez", "nro_parcela": "R-06" },
-            { "nombre_propietario": "René Contreras", "nro_parcela": "SA-19" },
+            { "nombre_propietario": "Carolina", "nro_parcela": "V-13" },
             { "nombre_propietario": "Marcela Bravo", "nro_parcela": "V-18" },
-            { "nombre_propietario": "Jaime", "nro_parcela": "R-12" },
-            { "nombre_propietario": "Hector Trecaman", "nro_parcela": "XX-XX" },
-            { "nombre_propietario": "Maria Dolores", "nro_parcela": "R-15" },
-            { "nombre_propietario": "Alberto Aravena", "nro_parcela": "R-19" },
-            {"nombre_propietario": "Alberto Aravena","nro_parcela": "R-19"},
-            {"nombre_propietario": "Viviana Solís","nro_parcela": "B-3"},
-            {"nombre_propietario": "Carlos Heide","nro_parcela": "XX-32"},
-            {"nombre_propietario": "Myriam","nro_parcela": "SA-11"},
-            {"nombre_propietario": "Federico Magofke", "nro_parcela": "XX-XX"},
-            {"nombre_propietario": "Carolina", "nro_parcela": "V-13"},
-            {"nombre_propietario": "Ricardo Maya", "nro_parcela": "V-10"},
-            {"nombre_propietario": "Gladys Vergara", "nro_parcela": "V-2"}
-        ];
+            { "nombre_propietario": "Federico Magofke", "nro_parcela": "VSL-01" },
+            { "nombre_propietario": "Fabián Esparza Oyarzún", "nro_parcela": "XX-XX" }
+                    ];
+
+        // ==========================================================
+        // [INICIO] NUEVO ARREGLO DE DATOS para Propietarios sin Responder
+        // ==========================================================
+        const unansweredOwnersData = [
+                {"nombre_propietario": "Sebastian Castro","nro_parcela": "ENTR-01"},
+                {"nombre_propietario": "Fran Mandiola","nro_parcela": "R-04"},
+                {"nombre_propietario": "Doctora Olate","nro_parcela": "R-05"},
+                {"nombre_propietario": "Elena","nro_parcela": "R-10"},
+                {"nombre_propietario": "Mario Massa","nro_parcela": "R-11"},
+                {"nombre_propietario": "Susana Topografa","nro_parcela": "R-02"},
+                {"nombre_propietario": "Denisse Mariela / Luis Sepulveda","nro_parcela": "SA-22"},
+                {"nombre_propietario": "Fernanda Saavedra","nro_parcela": "SA-29"},
+                {"nombre_propietario": "sucy","nro_parcela": "SM-01"},
+                {"nombre_propietario": "Fernando Vergara","nro_parcela": "V-01"},
+                {"nombre_propietario": "Gaby","nro_parcela": "V-09"},
+                {"nombre_propietario": "Ricardo","nro_parcela": "V-15"},
+                {"nombre_propietario": "cristina Salas","nro_parcela": "VSL-03"},
+                { "nro_parcela": "V-02", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-03", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-04", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-05", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-06", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-07", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-08", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-11", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-12", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "V-14", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "R-01", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "R-03", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "R-13", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "R-14", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-01", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-02", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-03", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-04", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-05", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-06", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-07", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-08", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-09", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-10", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-12", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-13", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-14", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-15", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-21", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-23", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-26", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-28", "nombre_propietario": "Sin Propietario Asignado" },
+                { "nro_parcela": "SA-30", "nombre_propietario": "Sin Propietario Asignado" }
+                                ];
+        // ==========================================================
+        // [FIN] NUEVO ARREGLO DE DATOS
+        // ==========================================================
 
         // --- 2. Variables de Estado Globales ---
 
@@ -201,9 +302,57 @@
 
         // --- 4. Renderización de Componentes (HTML Strings) ---
 
+        // ==========================================================
+        // [INICIO] NUEVA FUNCIÓN DE RENDERIZADO para Propietarios sin Responder
+        // ==========================================================
+        /**
+         * Genera el HTML para la lista de propietarios sin responder.
+         */
+        const renderUnansweredOwnersList = () => {
+            if (unansweredOwnersData.length === 0) {
+                return '';
+            }
+            
+            return `
+                <div class="lg:w-1/3 bg-white shadow-xl rounded-xl p-6 border-l-4 border-amber-500 h-fit">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-stone-100">
+                        <h3 class="text-lg font-bold text-stone-800 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-amber-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1.5-7.5a1 1 0 011.414 0l.707.707 2.121-2.121a1 1 0 111.414 1.414L10 13.414l-3.536-3.536a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                            Propietarios sin Contactar/Responder
+                        </h3>
+                    </div>
+                    
+                    <div class="overflow-y-auto max-h-80 border border-amber-300 rounded-lg shadow-inner">
+                        <table class="table-unanswered">
+                            <thead>
+                                <tr>
+                                    <th>Propietario</th>
+                                    <th>Parcela</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${unansweredOwnersData.map(owner => `
+                                    <tr>
+                                        <td class="text-stone-700">${owner.nombre_propietario}</td>
+                                        <td>
+                                            <span class="parcel-tag">${owner.nro_parcela}</span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        };
+        // ==========================================================
+        // [FIN] NUEVA FUNCIÓN DE RENDERIZADO
+        // ==========================================================
+        
         /**
          * Genera el HTML para el panel de acuerdos de camino.
          */
+        
         const renderRoadAgreementsPanel = () => {
             const totalParticipants = roadAgreementsData.length;
             const budget = FIXED_ROAD_BUDGET; // Usamos el valor fijo
@@ -300,6 +449,7 @@
                             </div>
                         </div>
 
+                        ${renderUnansweredOwnersList()}
                         ${renderRoadAgreementsPanel()}
                     </div>
                 </div>
@@ -703,6 +853,3 @@
     </script>
 </body>
 </html>
-
-
-
