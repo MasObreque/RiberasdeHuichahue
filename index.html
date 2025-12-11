@@ -60,6 +60,7 @@
         /* [FIN] ESTILOS PARA LA NUEVA TABLA */
         /* ========================================================== */
     </style>
+    <script src="./parcelas.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -98,7 +99,7 @@
     <script>
         // --- 1. Definición de Datos Estáticos (Simulación de .json) ---
 
-        const initialParcelsData = [
+       /* const initialParcelsData = [
             { "id": 1, "nro_parcela": "P-101", "loteo": "A", "nombre_propietario": "Ana Torres", "telefono_contacto": "56987654321", "email": "ana.torres@mail.cl", "estado_pago": "Al Día" },
             { "id": 2, "nro_parcela": "P-102", "loteo": "A", "nombre_propietario": "Benjamín Flores", "telefono_contacto": "56912345678", "email": "benja.f@mail.cl", "estado_pago": "Con Deuda" },
             { "id": 3, "nro_parcela": "P-103", "loteo": "A", "nombre_propietario": "Carla Soto", "telefono_contacto": "56923456789", "email": "carla.s@mail.cl", "estado_pago": "Al Día" },
@@ -107,8 +108,28 @@
             { "id": 6, "nro_parcela": "P-301", "loteo": "C", "nombre_propietario": "Felipe Herrera", "telefono_contacto": "56956789012", "email": "felipe.h@mail.cl", "estado_pago": "Con Deuda" },
             { "id": 7, "nro_parcela": "P-302", "loteo": "C", "nombre_propietario": "Gabriela Izquierdo", "telefono_contacto": "56967890123", "email": "gabriela.i@mail.cl", "estado_pago": "Al Día" },
             { "id": 8, "nro_parcela": "P-401", "loteo": "D", "nombre_propietario": "Héctor Jiménez", "telefono_contacto": "56978901234", "email": "hector.j@mail.cl", "estado_pago": "Con Deuda" }
-        ];
+        ];*/
+        // ✅ CÓDIGO NUEVO - Verificación de carga de datos externos ✅
+let initialParcelsData = [];
 
+// Verificar si parcelas.js se cargó correctamente
+if (typeof parcelasData === 'undefined') {
+    document.getElementById('app-root').innerHTML = `
+        <div class="p-8 text-center text-red-700 bg-red-100 border border-red-300 rounded-xl m-8">
+            <h2 class="text-xl font-bold">⚠️ Error: Archivo parcelas.js no encontrado</h2>
+            <p class="mt-2">Asegúrate de que el archivo 'parcelas.js' esté en la misma carpeta que este HTML.</p>
+            <p class="mt-2 text-sm">Estructura esperada:</p>
+            <pre class="mt-2 text-left bg-stone-800 text-green-400 p-3 rounded text-xs">
+tu-carpeta/
+├── index.html
+└── parcelas.js
+            </pre>
+        </div>
+    `;
+} else {
+    // Si se cargó correctamente, asignar los datos
+    initialParcelsData = parcelasData;
+}
         const roadAgreementsData = [
             { "nombre_propietario": "Hector Trecaman", "nro_parcela": "HT-01" },
             { "nombre_propietario": "Hector Trecaman", "nro_parcela": "HT-02" },
@@ -141,7 +162,7 @@
             { "nombre_propietario": "Jose Santa Maria", "nro_parcela": "SM-XX" },
             { "nombre_propietario": "Jose Santa Maria", "nro_parcela": "SM-XX" },
             { "nombre_propietario": "Gladys Vergara", "nro_parcela": "V-02" },
-            { "nombre_propietario": "Gabriela Delgado", "nro_parcela": "V-08" },
+            { "nombre_propietario": "Gabriela Delgado", "nro_parcela": "V-09" },
             { "nombre_propietario": "Ricardo Maya", "nro_parcela": "V-10" },
             { "nombre_propietario": "Felipe Bruggink", "nro_parcela": "V-11" },
             { "nombre_propietario": "Felipe Bruggink", "nro_parcela": "V-12" },
@@ -218,6 +239,15 @@
         let filterStatus = 'Todos';
         let hoveredParcela = null;
 
+        // ✅ VERIFICACIÓN E INICIALIZACIÓN INMEDIATA
+if (typeof parcelasData !== 'undefined' && parcelasData.length > 0) {
+    initialParcelsData = parcelasData;
+    console.log('✅ Datos cargados correctamente:', initialParcelsData.length, 'parcelas');
+} else {
+    console.error('❌ parcelasData no está disponible o está vacío');
+    initialParcelsData = [];
+}
+
 
         // --- 3. Funciones de Utilidad y Persistencia ---
 
@@ -245,23 +275,37 @@
         /**
          * Carga los datos de las parcelas, aplicando los overrides de localStorage.
          */
-        const loadParcelsData = () => {
-            try {
-                const overrides = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-                const updatedParcels = initialParcelsData.map(parcel => {
-                    if (overrides[parcel.id]) {
-                        return { ...parcel, estado_pago: overrides[parcel.id] };
-                    }
-                    return { ...parcel };
-                });
-                parcels = updatedParcels;
-            } catch (error) {
-                console.error("Error al cargar datos de parcelas de localStorage:", error);
-                parcels = initialParcelsData; // Fallback
-            }
-        };
-        
         /**
+ * Carga los datos de las parcelas, aplicando los overrides de localStorage.
+ */
+const loadParcelsData = () => {
+    console.log('🔄 Ejecutando loadParcelsData...');
+    console.log('initialParcelsData tiene:', initialParcelsData.length, 'elementos');
+    
+    if (!initialParcelsData || initialParcelsData.length === 0) {
+        console.error('❌ initialParcelsData está vacío o no existe');
+        parcels = [];
+        return;
+    }
+    
+    try {
+        const overrides = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
+        console.log('Overrides encontrados:', Object.keys(overrides).length);
+        
+        const updatedParcels = initialParcelsData.map(parcel => {
+            if (overrides[parcel.id]) {
+                return { ...parcel, estado_pago: overrides[parcel.id] };
+            }
+            return { ...parcel };
+        });
+        
+        parcels = updatedParcels;
+        console.log('✅ Parcels cargado con:', parcels.length, 'elementos');
+    } catch (error) {
+        console.error("❌ Error al cargar datos de parcelas:", error);
+        parcels = [...initialParcelsData]; // Fallback
+    }
+};        /**
          * La función loadRoadAgreementBudget y handleBudgetChange han sido eliminadas
          * porque el presupuesto es ahora un valor fijo (FIXED_ROAD_BUDGET).
          */
@@ -629,15 +673,81 @@
          */
         const renderMapa = () => {
             const svgMapData = [
-                { nro: 'P-101', x: 10, y: 10, w: 40, h: 20 },
-                { nro: 'P-102', x: 50, y: 10, w: 40, h: 20 },
-                { nro: 'P-103', x: 90, y: 10, w: 40, h: 20 },
-                { nro: 'P-201', x: 10, y: 30, w: 60, h: 20 },
-                { nro: 'P-202', x: 70, y: 30, w: 60, h: 20 },
-                { nro: 'P-301', x: 10, y: 50, w: 20, h: 30 },
-                { nro: 'P-302', x: 30, y: 50, w: 20, h: 30 },
-                { nro: 'P-401', x: 50, y: 50, w: 80, h: 30 },
-            ];
+                { nro: 'ENTR-01', x: 10, y: 10, w: 40, h: 20 },
+                { nro: 'VSL-01', x: 50, y: 10, w: 40, h: 20 },
+                { nro: 'VSL-02', x: 90, y: 10, w: 40, h: 20 },
+                { nro: 'VSL-03', x: 10, y: 30, w: 60, h: 20 },
+                { nro: 'V-01', x: 70, y: 30, w: 60, h: 20 },
+                { nro: 'V-02', x: 10, y: 50, w: 20, h: 30 },
+                { nro: 'V-03', x: 30, y: 50, w: 20, h: 30 },
+                { nro: 'V-04', x: 50, y: 50, w: 80, h: 30 },
+                { nro: 'V-05', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-06', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-07', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-08', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-09', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-10', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-11', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-12', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-13', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-14', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'V-15', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-01', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-02', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-03', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-04', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-05', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-06', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-07', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-08', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-09', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-10', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-11', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-12', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-13', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-14', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-15', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-16', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'R-19', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-01', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-02', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-03', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-04', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-05', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-06', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-07', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-08', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-09', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-10', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-11', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-12', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-13', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-14', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-15', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-16', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-17', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-18', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-19', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-20', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-21', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-22', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-23', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-24', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-25', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-26', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-27', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-28', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-29', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-30', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-31', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-32', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SA-33', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SM-01', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SM-XX', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SM-03B', x: 0, y: 0, w: 0, h: 0 },
+                { nro: 'SM-XX', x: 0, y: 0, w: 0, h: 0 }
+                ];
+            
 
             const getParcelStyle = (nro_parcela) => {
                 const parcel = parcels.find(p => p.nro_parcela === nro_parcela);
@@ -844,14 +954,74 @@
 
         // --- 6. Inicialización de la Aplicación ---
 
-        window.onload = function () {
+       /* window.onload = function () {
             // Cargar datos y presupuesto iniciales (incluida la persistencia del presupuesto)
-            loadParcelsData();
+           // loadParcelsData(); -> preguntar despues 
             //loadRoadAgreementBudget();
             
             // Renderizar la aplicación por primera vez
             renderApp();
-        };
+        };*/
+        // --- 5. Inicialización de la Aplicación (Carga Asíncrona) ---
+
+/**
+ * Carga los datos de parcelas desde el archivo JSON externo y arranca la aplicación.
+ */
+// --- 5. Inicialización de la Aplicación (Carga Síncrona para file://) ---
+
+/**
+ * Carga los datos de parcelas desde el archivo JSON, usando XMLHttpRequest
+ * para evitar el bloqueo CORS al ejecutar el HTML localmente (file:/// protocolo).
+ */
+  // --- INICIALIZACIÓN DE LA APLICACIÓN ---
+console.log('🚀 Iniciando aplicación...');
+
+// Esperar a que el DOM esté completamente cargado
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarApp);
+} else {
+    inicializarApp();
+}
+
+function inicializarApp() {
+    console.log('📱 DOM listo, inicializando...');
+    
+    // Verificar que parcelasData existe
+    if (typeof parcelasData === 'undefined') {
+        console.error('❌ CRÍTICO: parcelasData no está definido');
+        document.getElementById('app-root').innerHTML = `
+            <div class="p-8 text-center text-red-700 bg-red-100 border border-red-300 rounded-xl m-8">
+                <h2 class="text-xl font-bold">⚠️ Error Crítico</h2>
+                <p>El archivo 'parcelas.js' no se cargó correctamente.</p>
+                <p class="mt-2 text-sm">Verifica que:</p>
+                <ul class="text-left mt-2 ml-8 list-disc">
+                    <li>El archivo 'parcelas.js' existe en la misma carpeta</li>
+                    <li>La línea &lt;script src="parcelas.js"&gt;&lt;/script&gt; está ANTES del script principal</li>
+                    <li>El archivo contiene: const parcelasData = [...];</li>
+                </ul>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log('✅ parcelasData disponible con', parcelasData.length, 'parcelas');
+    
+    // Asignar datos iniciales
+    initialParcelsData = parcelasData;
+    
+    // Cargar estado con overrides
+    loadParcelsData();
+    
+    // Renderizar aplicación
+    renderApp();
+    
+    console.log('✅ Aplicación inicializada correctamente');
+    console.log('📊 Estado actual:', {
+        totalParcelas: parcels.length,
+        conDeuda: parcels.filter(p => p.estado_pago === 'Con Deuda').length,
+        alDia: parcels.filter(p => p.estado_pago === 'Al Día').length
+    });
+}
     </script>
 </body>
 </html>
